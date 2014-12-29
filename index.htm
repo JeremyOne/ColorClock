@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-  <title> - jsFiddle demo</title>
+  <title>ColorClock</title>
   
   <script type='text/javascript' src='//code.jquery.com/jquery-2.1.0.js'></script>
   <link rel="stylesheet" type="text/css" href="/css/result-light.css">
@@ -11,10 +11,17 @@
     html{
       font-size:10px;
     }
+    #timeMode{
+      opacity: 0.5;
+    }
+    #timeMode:hover{
+      opacity: 0.5;
+    }
   </style>
 
 <script type='text/javascript'>//<![CDATA[ 
 $(window).load(function(){
+
 updateColor();
 
 function updateColor(){
@@ -41,7 +48,7 @@ function updateColor(){
     }
     
     $("html").css("background-color", color);
-    $("#timeBox").text(roundTo(h, 2) + ":" + roundTo(m, 2) + ":" + s + " " + color);
+    $("#timeBox").text(d.getHours() + ":" + pad(d.getMinutes(),2) + ":" + pad(d.getSeconds(),2));
     
     setTimeout(updateColor, 1000);
 }
