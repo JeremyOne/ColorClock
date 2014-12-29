@@ -48,7 +48,7 @@ function updateColor(){
     }
     
     $("html").css("background-color", color);
-    $("#timeBox").text(d.getHours() + ":" + pad(d.getMinutes(),2) + ":" + pad(d.getSeconds(),2));
+    $("#timeBox").text(d.getHours() + ":" + pad(d.getMinutes(),2) + ":" + pad(d.getSeconds(),2) + " " + color);
     
     setTimeout(updateColor, 1000);
 }
