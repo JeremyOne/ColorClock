@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title> - jsFiddle demo</title>
+  
+  <script type='text/javascript' src='//code.jquery.com/jquery-2.1.0.js'></script>
+  <link rel="stylesheet" type="text/css" href="/css/result-light.css">
+  
+  <style type='text/css'>
+    html{
+      font-size:10px;
+    }
+  </style>
+
+<script type='text/javascript'>//<![CDATA[ 
+$(window).load(function(){
+updateColor();
+
+function updateColor(){
+    var d = new Date();
+    var h = d.getHours() + (d.getMinutes() / 60) + (d.getSeconds() / 360)
+    var m = d.getMinutes() + (d.getSeconds() / 60);
+    var s = d.getSeconds();
+    
+    var timeMode = $("#timeMode option:selected").text();    
+    var color = "";
+    
+    if (timeMode == "RGB"){
+        var h2 = getRange(h, 24, 255, true);
+        var m2 = getRange(m, 60, 255, true);
+        var s2 = getRange(s, 60, 255, true);
+        
+        var color = "RGB(" + h2 + "," + m2 + "," + s2 + ")";
+    }else if (timeMode == "HSL"){
+        var h2 = getRange(h, 24, 360, true);
+        var m2 = getRange(m, 60, 100, true);
+        var s2 = getRange(s, 60, 80, true) + 10;
+        
+        var color = "HSL(" + h2 + "," + s2 + "%," + m2 + "%)";
+    }
+    
+    $("html").css("background-color", color);
+    $("#timeBox").text(roundTo(h, 2) + ":" + roundTo(m, 2) + ":" + s + " " + color);
+    
+    setTimeout(updateColor, 1000);
+}
+
+function getRange(forValue, oldMax, newMax, roundResult){
+    var percent = forValue / oldMax;
+    var newValue = percent * newMax;
+    
+    if(roundResult){
+        newValue = Math.round(newValue);
+    }
+    
+    return newValue;
+}
+
+function roundTo(forValue, decimalPoints){
+    var multiplier =  Math.pow(10, decimalPoints);
+    return Math.round(forValue * multiplier) / multiplier
+}
+
+function pad(num, size) {
+    var s = num+"";
+    while (s.length < size) s = "0" + s;
+    return s;
+}
+});//]]>  
+
+</script>
+
+
+</head>
+<body>
+  <select id="timeMode">
+  <option>RGB</option>
+  <option>HSL</option>
+</select> 
+<span id="timeBox"></span>
+  
+</body>
+
+
+</html>
+
