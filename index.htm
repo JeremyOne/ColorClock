@@ -4,101 +4,140 @@
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <title>ColorClock</title>
   
-  <script type='text/javascript' src='//code.jquery.com/jquery-2.1.0.js'></script>
-  <link rel="stylesheet" type="text/css" href="/css/result-light.css">
+  <script type='text/javascript' src='https://code.jquery.com/jquery-2.1.0.js'></script>
+  <!--link rel="stylesheet" type="text/css" href="/css/result-light.css"-->
   <link href="https://fonts.googleapis.com/css?family=Fira+Mono" rel="stylesheet">
   
   <style type='text/css'>
     html{
-      font-family: 'Fira Mono', monospace;
+        font-family: 'Fira Mono', monospace;
+        margin:0;
+        padding:0;
     }
     #timeMode{
-      opacity: 0.5;
+        opacity: 0.5;
     }
     #timeMode:hover{
-      opacity: 0.5;
+        opacity: 0.5;
     }
-    #timeBox{
-      font-size:15px;
-      color:#fff;
-      position: fixed;
-      left: 0;
-      bottom: 0;
-      padding:5px;
-      background-color:rgba(0,0,0,0.3);
+    #settings{
+        font-size:10px;
+        position: fixed;
+        left: 0;
+        top: 0;
+    }
+    #time{
+        font-size:15px;
+        color:#fff;
+        position: fixed;
+        left: 0;
+        bottom: 0;
+    }
+    .box{
+        color:#fff;
+        padding:5px;
+        background-color:rgba(0,0,0,0.2);
+    }
+    #timeClose, #settingsClose{
+        font-size: 8px;
+        color:#fff;
+        opacity: 0.5;
+        font-weight: bold;
+        vertical-align: top;
+        padding-left: 5px;
+    }
+    #settingsClose{
+        float:right;      
     }
   </style>
 
 <script type='text/javascript'>//<![CDATA[ 
 $(window).load(function(){
 
-updateColor();
+    updateColor();
+    
+    $("#timeClose").click(function(){
+        $("#timeBox").toggle( "slide" );
+    });
+    
+    $("#settingsClose").click(function(){
+        $("#settingsBox").toggle( "slide" );
+    });
 
-function updateColor(){
-    var d = new Date();
-    var h = d.getHours() + (d.getMinutes() / 60) + (d.getSeconds() / 360)
-    var m = d.getMinutes() + (d.getSeconds() / 60);
-    var s = d.getSeconds();
-    
-    var timeMode = $("#timeMode option:selected").text();    
-    var color = "";
-    
-    if (timeMode == "RGB"){
-        var h2 = getRange(h, 24, 255, true);
-        var m2 = getRange(m, 60, 255, true);
-        var s2 = getRange(s, 60, 255, true);
-        
-        var color = "RGB(" + h2 + "," + m2 + "," + s2 + ")";
-    }else if (timeMode == "HSL"){
-        var h2 = getRange(h, 24, 360, true);
-        var m2 = getRange(m, 60, 100, true);
-        var s2 = getRange(s, 60, 80, true) + 10;
-        
-        var color = "HSL(" + h2 + "," + s2 + "%," + m2 + "%)";
+    function updateColor(){
+        var d = new Date();
+        var h = d.getHours() + (d.getMinutes() / 60) + (d.getSeconds() / 360)
+        var m = d.getMinutes() + (d.getSeconds() / 60);
+        var s = d.getSeconds();
+
+        var timeMode = $("#timeMode option:selected").text();    
+        var color = "";
+
+        if (timeMode == "RGB"){
+            var h2 = getRange(h, 24, 255, true);
+            var m2 = getRange(m, 60, 255, true);
+            var s2 = getRange(s, 60, 255, true);
+
+            var color = "RGB(" + h2 + "," + m2 + "," + s2 + ")";
+        }else if (timeMode == "HSL"){
+            var h2 = getRange(h, 24, 360, true);
+            var m2 = getRange(m, 60, 100, true);
+            var s2 = getRange(s, 60, 80, true) + 10;
+
+            var color = "HSL(" + h2 + "," + s2 + "%," + m2 + "%)";
+        }
+
+        $("html").css("background-color", color);
+        $("#timeBox").text(d.getHours() + ":" + pad(d.getMinutes(),2) + ":" + pad(d.getSeconds(),2) + " " + color);
+
+        setTimeout(updateColor, 1000);
     }
-    
-    $("html").css("background-color", color);
-    $("#timeBox").text(d.getHours() + ":" + pad(d.getMinutes(),2) + ":" + pad(d.getSeconds(),2) + " " + color);
-    
-    setTimeout(updateColor, 1000);
-}
 
-function getRange(forValue, oldMax, newMax, roundResult){
-    var percent = forValue / oldMax;
-    var newValue = percent * newMax;
-    
-    if(roundResult){
-        newValue = Math.round(newValue);
+    function getRange(forValue, oldMax, newMax, roundResult){
+        var percent = forValue / oldMax;
+        var newValue = percent * newMax;
+
+        if(roundResult){
+            newValue = Math.round(newValue);
+        }
+
+        return newValue;
     }
-    
-    return newValue;
-}
 
-function roundTo(forValue, decimalPoints){
-    var multiplier =  Math.pow(10, decimalPoints);
-    return Math.round(forValue * multiplier) / multiplier
-}
+    function roundTo(forValue, decimalPoints){
+        var multiplier =  Math.pow(10, decimalPoints);
+        return Math.round(forValue * multiplier) / multiplier
+    }
 
-function pad(num, size) {
-    var s = num+"";
-    while (s.length < size) s = "0" + s;
-    return s;
-}
+    function pad(num, size) {
+        var s = num + "";
+        while (s.length < size) s = "0" + s;
+        return s;
+    }
 });//]]>  
 
 </script>
 
 
 </head>
-<body>
-  <select id="timeMode">
-  <option>RGB</option>
-  <option>HSL</option>
-</select> 
-<span id="timeBox"></span>
-  
-</body>
+    <body>
+        <div id="settings" class="box">
+            <a href="#" id="settingsClose">[x]</a>
+            <span id="settingsBox">
+                <p>Settings</p>
+                <p>Color Mode
+                    <select id="timeMode">
+                        <option>RGB</option>
+                        <option>HSL</option>
+                    </select>
+                </p>
+            </span>
+        </div>
+        
 
-
+        <div id="time" class="box">
+            <span id="timeBox"></span>
+            <a href="#" id="timeClose">[x]</a>
+        </div>
+    </body>
 </html>
-
