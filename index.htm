@@ -26,6 +26,9 @@
         left: 0;
         top: 0;
     }
+    #HslSettings{
+        display:none;
+    }
     #time{
         font-size:15px;
         color:#fff;
@@ -55,6 +58,7 @@
 $(window).load(function(){
 
     updateColor();
+    setInterval(updateColor, 1000);
     
     $("#timeClose").click(function(){
         $("#timeBox").toggle( "slide" );
@@ -64,36 +68,107 @@ $(window).load(function(){
         $("#settingsBox").toggle( "slide" );
     });
 
+    $("#timeMode").change(function(){
+        if(timeMode.value == "HSL"){
+            $("#HslSettings").show("slide");
+        }else{
+            $("#HslSettings").hide("slide");
+        }
+    });
+});//]]>  
+    
+
     function updateColor(){
-        var d = new Date();
-        var h = d.getHours() + (d.getMinutes() / 60) + (d.getSeconds() / 360)
-        var m = d.getMinutes() + (d.getSeconds() / 60);
-        var s = d.getSeconds();
 
-        var timeMode = $("#timeMode option:selected").text();    
         var color = "";
-
+        var d = new Date();    
+        var timeMode = $("#timeMode option:selected").text();
+        
         if (timeMode == "RGB"){
+            var h = d.getHours() + (d.getMinutes() / 60) + (d.getSeconds() / 360)
+            var m = d.getMinutes() + (d.getSeconds() / 60);
+            var s = d.getSeconds();
+
             var h2 = getRange(h, 24, 255, true);
             var m2 = getRange(m, 60, 255, true);
             var s2 = getRange(s, 60, 255, true);
 
-            var color = "RGB(" + h2 + "," + m2 + "," + s2 + ")";
-        }else if (timeMode == "HSL"){
-            var h2 = getRange(h, 24, 360, true);
-            var m2 = getRange(m, 60, 100, true);
-            var s2 = getRange(s, 60, 80, true) + 10;
+            color = "RGB(" + h2 + "," + m2 + "," + s2 + ")";
+        } else if (timeMode == "HSL"){
+            var hueMode = $("#hsl-hue-mode").val();
+            var hueMax = $("#hsl-hue-max").val() * 1;
+            var hueMin = $("#hsl-hue-min").val() * 1;
 
-            var color = "HSL(" + h2 + "," + s2 + "%," + m2 + "%)";
+            var satMode = $("#hsl-sat-mode").val();
+            var satMax = $("#hsl-sat-max").val() * 1;
+            var satMin = $("#hsl-sat-min").val() * 1;
+
+            var lightMode = $("#hsl-light-mode").val();
+            var lightMax = $("#hsl-light-max").val() * 1;
+            var lightMin = $("#hsl-light-min").val() * 1;
+
+            var hue =   Math.round(getTimeSegment(hueMode) * hueMax) + hueMin;
+            var sat =   Math.round(getTimeSegment(satMode) * satMax) + satMin;
+            var light = Math.round(getTimeSegment(lightMode) * lightMax) + lightMin;
+                    
+            color = "HSL(" + hue + "," + sat + "%," + light + "%)";
         }
 
         $("html").css("background-color", color);
         $("#timeBox").text(d.getHours() + ":" + pad(d.getMinutes(),2) + ":" + pad(d.getSeconds(),2) + " " + color);
 
-        setTimeout(updateColor, 1000);
     }
 
+    function getTimeSegment(mode){
+        //gets the requested time segment (hour, minute, second) in the range of 0-1
+        var d = new Date();
+        var h = d.getHours() + (d.getMinutes() / 60) + (d.getSeconds() / 360)
+        var m = d.getMinutes() + (d.getSeconds() / 60);
+        var s = d.getSeconds();
+        
+        var max = 1;
+        var value = 1;
+        
+        if(mode.indexOf("h12") == 0) {
+            if(h > 12){
+                h -= 12;
+            }
+            
+            max = 12;
+            value = h;
+        }
+        
+        if(mode.indexOf("h24") == 0) {
+            max = 24;
+            value = h;
+        }
+        
+        if(mode.indexOf("m") == 0) {
+            max = 60;
+            value = m;
+        }
+        
+        if(mode.indexOf("s") == 0) {
+            max = 60;
+            value = s;
+        }
+        
+        if(mode.indexOf("c") > -1){
+            //a sine wave
+            value = getRange(value, max, 360, false);
+            value = Math.sin(value * Math.PI / 360); 
+        } else {
+            value = getRange(value, max, 1, false);
+        }
+        
+        return value;
+    }
+    
     function getRange(forValue, oldMax, newMax, roundResult){
+        if(forValue == 0){
+            return 0;
+        }
+        
         var percent = forValue / oldMax;
         var newValue = percent * newMax;
 
@@ -104,17 +179,11 @@ $(window).load(function(){
         return newValue;
     }
 
-    function roundTo(forValue, decimalPoints){
-        var multiplier =  Math.pow(10, decimalPoints);
-        return Math.round(forValue * multiplier) / multiplier
-    }
-
     function pad(num, size) {
         var s = num + "";
         while (s.length < size) s = "0" + s;
         return s;
     }
-});//]]>  
 
 </script>
 
@@ -124,13 +193,66 @@ $(window).load(function(){
         <div id="settings" class="box">
             <a href="#" id="settingsClose">[x]</a>
             <span id="settingsBox">
-                <p>Settings</p>
+                <p><h1>Settings</h1></p>
                 <p>Color Mode
                     <select id="timeMode">
                         <option>RGB</option>
                         <option>HSL</option>
                     </select>
                 </p>
+                <span id="HslSettings">
+                    <h2>HSL Mode</h2>
+                    
+                    <p><h3>Hue</h3>
+                        Min: <input type="number" id="hsl-hue-min" min="0" max="360" value="0">
+                        Max: <input type="number" id="hsl-hue-max" min="0" max="360" value="360"><br/>
+                        
+                        Fill value from: 
+                        <select id="hsl-hue-mode">
+                            <option value="h12">Hours (12)</option>
+                            <option value="h24">Hours (24)</option>
+                            <option value="h12c" selected>Hours (12 - sine)</option>
+                            <option value="h24c">Hours (24 - sine)</option>
+                            <option value="m">Minutes</option>
+                            <option value="mc">Minutes (sine)</option>
+                            <option value="s">Seconds</option>
+                            <option value="sc">Seconds (sine)</option>
+                        </select>
+                    </p>
+                    
+                    <p><h3>Saturation</h3>
+                        Min: <input type="number" id="hsl-sat-min" min="0" max="100" value="0">
+                        Max: <input type="number" id="hsl-sat-max" min="0" max="100" value="100"><br/>
+                        
+                        Fill value from: 
+                        <select id="hsl-sat-mode">
+                            <option value="h12">Hours (12)</option>
+                            <option value="h24">Hours (24)</option>
+                            <option value="h12c">Hours (12 - sine)</option>
+                            <option value="h24c" selected>Hours (24 - sine)</option>
+                            <option value="m">Minutes</option>
+                            <option value="mc">Minutes (sine)</option>
+                            <option value="s">Seconds</option>
+                            <option value="sc">Seconds (sine)</option>
+                        </select>
+                    </p>
+            <p><h3>Lightness</h3>
+                        Min: <input type="number" id="hsl-light-min" min="0" max="100" value="0">
+                        Max: <input type="number" id="hsl-light-max" min="0" max="100" value="100"><br/>
+                        
+                        Fill value from: 
+                        <select id="hsl-light-mode">
+                            <option value="h12">Hours (12)</option>
+                            <option value="h24">Hours (24)</option>
+                            <option value="h12c">Hours (12 - sine)</option>
+                            <option value="h24c">Hours (24 - sine)</option>
+                            <option value="m">Minutes</option>
+                            <option value="mc" selected>Minutes (sine)</option>
+                            <option value="s">Seconds</option>
+                            <option value="sc">Seconds (sine)</option>
+                        </select>
+                    </p>
+                </span>
             </span>
         </div>
         
